@@ -31,8 +31,7 @@ export function formatHistoryTime(isoString: string): string {
   try {
     const d = new Date(isoString);
     const hours = String(d.getHours()).padStart(2, '0');
-    const mins = String(d.getMinutes()).padStart(2, '0');
-    return `${hours}:${mins}`;
+    return `${hours}:00`;
   } catch {
     return '00:00';
   }
@@ -247,24 +246,22 @@ export async function getServerBySlug(slug: string, allowPending = false): Promi
 export async function recordPlayerSnapshot(serverId: string, count: number): Promise<void> {
   if (typeof count !== 'number' || isNaN(count) || count < 0) return;
   const now = new Date();
-  const nowIso = now.toISOString();
-  const timeStr = formatHistoryTime(nowIso);
+  const hourDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 0, 0, 0);
+  const hourIso = hourDate.toISOString();
+  const timeStr = formatHistoryTime(hourIso);
 
-  // In-memory store (also used for immediate local updates)
+  // In-memory store
   const existingMem = memoryPlayerHistory.get(serverId) || [];
   if (existingMem.length > 0) {
     const last = existingMem[existingMem.length - 1];
     const lastTime = last.recorded_at ? new Date(last.recorded_at).getTime() : 0;
-    // Throttle: 1 snapshot every 1 hour (60 minutes)
-    if (Date.now() - lastTime < 60 * 60 * 1000) {
-      last.count = count;
-      last.recorded_at = nowIso;
-      last.time = timeStr;
+    // Strictly throttle: only 1 telemetry point per full hour (e.g. 09:00, 10:00, 11:00)
+    if (now.getTime() - lastTime < 60 * 60 * 1000) {
       return;
     }
   }
 
-  const newPoint = { count, recorded_at: nowIso, time: timeStr };
+  const newPoint = { count, recorded_at: hourIso, time: timeStr };
   existingMem.push(newPoint);
   if (existingMem.length > 24) existingMem.shift();
   memoryPlayerHistory.set(serverId, existingMem);
@@ -745,7 +742,6 @@ export async function updateServerLiveStatus(slugOrId: string, updates: {
   region?: string;
   language?: string;
   logo_url?: string;
-  banner_url?: string;
 }): Promise<boolean> {
   const cleanKey = slugOrId.toLowerCase().trim();
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cleanKey);
@@ -760,7 +756,6 @@ export async function updateServerLiveStatus(slugOrId: string, updates: {
     if (updates.region) memServer.region = updates.region;
     if (updates.language) memServer.language = updates.language;
     if (updates.logo_url && !memServer.logo_url) memServer.logo_url = updates.logo_url;
-    if (updates.banner_url && !memServer.banner_url) memServer.banner_url = updates.banner_url;
   }
 
   // 2. Update Supabase
@@ -776,7 +771,6 @@ export async function updateServerLiveStatus(slugOrId: string, updates: {
       if (updates.region) payload.region = updates.region;
       if (updates.language) payload.language = updates.language;
       if (updates.logo_url) payload.logo_url = updates.logo_url;
-      if (updates.banner_url) payload.banner_url = updates.banner_url;
 
       let query = supabase.from('servers').update(payload);
       if (isUuid) {

@@ -762,13 +762,33 @@ button, input, select {
   display: block;
 }
 
-/* Empty slot keeping name alignment when no banner is uploaded */
-.server-banner-placeholder {
-  width: 370px;
-  height: 72px;
+.server-avatar-link {
+  display: block;
   flex-shrink: 0;
-  border-radius: 5px;
-  background: transparent;
+  line-height: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  background-color: #191b22;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+}
+
+.server-avatar-link:hover {
+  transform: scale(1.04);
+  filter: brightness(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.server-avatar-thumb {
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background-color: #191b22;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  display: block;
 }
 
 .server-details {

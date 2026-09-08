@@ -85,30 +85,29 @@ export default function ServerDetailClient({ server, initialLatency }: ServerDet
       {/* Server Hero Showcase Card */}
       <section className="server-hero-card">
         <div className="server-hero-top">
-          {/* Large Animated Banner Showcase — only shown if a banner was uploaded */}
-          {server.banner_url && (
-            <div className="server-hero-banner-wrap">
-              <img
-                src={server.banner_url}
-                alt={`${server.name} Banner`}
-                id="server-hero-banner"
-                className="server-hero-banner"
-              />
-            </div>
-          )}
-
           <div className="server-hero-header">
             <div className="server-identity-lockup">
-              <div className="server-hero-avatar">
-                <img
-                  src={server.logo_url || '/assets/servers/server_1.png'}
-                  alt={server.name}
-                  width="72"
-                  height="72"
-                  className="server-avatar-img"
-                  id="server-page-avatar"
-                />
-              </div>
+              {server.banner_url ? (
+                <div className="server-hero-banner-wrap">
+                  <img
+                    src={server.banner_url}
+                    alt={`${server.name} Banner`}
+                    id="server-hero-banner"
+                    className="server-hero-banner-img"
+                  />
+                </div>
+              ) : (
+                <div className="server-hero-avatar">
+                  <img
+                    src={server.logo_url || '/assets/servers/server_1.png'}
+                    alt={server.name}
+                    width="72"
+                    height="72"
+                    className="server-avatar-img"
+                    id="server-page-avatar"
+                  />
+                </div>
+              )}
 
               <div className="server-hero-meta">
                 <div className="server-title-row">

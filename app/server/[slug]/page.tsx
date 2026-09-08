@@ -82,28 +82,18 @@ export default async function ServerPage({ params }: PageProps) {
     // Record genuine snapshot in database telemetry
     recordPlayerSnapshot(server.id, liveFiveM.players).catch(() => {});
 
-    // Ensure server.player_history has this latest genuine point
     const historyList = [...(server.player_history || [])];
-    const nowIso = new Date().toISOString();
-    const timeLabel = formatHistoryTime(nowIso);
-
-    if (historyList.length === 0) {
-      historyList.push({
-        time: timeLabel,
-        count: liveFiveM.players,
-        recorded_at: nowIso
-      });
-    } else {
+    const now = new Date();
+    if (historyList.length > 0) {
       const lastPoint = historyList[historyList.length - 1];
       const lastTime = lastPoint.recorded_at ? new Date(lastPoint.recorded_at).getTime() : 0;
-      if (Date.now() - lastTime >= 60 * 60 * 1000) {
+      if (now.getTime() - lastTime >= 60 * 60 * 1000) {
+        const hourDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 0, 0, 0);
         historyList.push({
-          time: timeLabel,
+          time: formatHistoryTime(hourDate.toISOString()),
           count: liveFiveM.players,
-          recorded_at: nowIso
+          recorded_at: hourDate.toISOString()
         });
-      } else {
-        lastPoint.count = liveFiveM.players;
       }
     }
 
@@ -116,13 +106,12 @@ export default async function ServerPage({ params }: PageProps) {
       player_history: historyList
     };
 
-    // Persist live player counts and status to database and cache
+    // Persist live player counts and status to database and cache (NEVER overwrite submitted banner)
     updateServerLiveStatus(server.id, {
       current_players: liveFiveM.players,
       max_players: liveFiveM.maxPlayers > 0 ? liveFiveM.maxPlayers : server.max_players,
       status: 'online',
-      logo_url: liveFiveM.logoUrl,
-      banner_url: liveFiveM.bannerUrl
+      logo_url: liveFiveM.logoUrl
     }).catch(() => {});
   }
 

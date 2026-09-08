@@ -38,7 +38,24 @@ export default function ServerCard({ server, rank }: ServerCardProps) {
               }}
             />
           </Link>
-        ) : null}
+        ) : (
+          <Link 
+            href={`/server/${server.slug}`} 
+            className="server-avatar-link" 
+            aria-label={server.name}
+          >
+            <img
+              src={server.logo_url || '/assets/servers/server_1.png'}
+              alt={`${server.name} Logo`}
+              className="server-avatar-thumb"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.onerror = null;
+                target.src = '/assets/servers/server_1.png';
+              }}
+            />
+          </Link>
+        )}
         <div className="server-details">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
             <h3 className="server-title">
