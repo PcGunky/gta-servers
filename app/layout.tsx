@@ -44,6 +44,17 @@ export const metadata: Metadata = {
     title: 'GTA SERVERS — GTA 5 & FiveM Server Rankings',
     description: 'Explore top FiveM and GTA roleplay servers with live tracking.',
     images: ['/assets/herote.png'],
+  },
+  icons: {
+    icon: [
+      { url: '/favicon.jpg', type: 'image/jpeg' },
+      { url: '/favicon.ico' },
+      { url: 'https://scldnatvywnrosryqzbz.supabase.co/storage/v1/object/public/GTA%20Serverlist/gta_server_list.jpg', type: 'image/jpeg' }
+    ],
+    shortcut: ['/favicon.jpg'],
+    apple: [
+      { url: '/favicon.jpg' }
+    ]
   }
 };
 
@@ -62,6 +73,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <link rel="icon" type="image/jpeg" href="/favicon.jpg" />
+        <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" href="/favicon.jpg" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
