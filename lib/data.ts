@@ -737,4 +737,61 @@ export async function attachServerDiscordMessage(slugOrId: string, messageId: st
   return false;
 }
 
+export async function updateServerLiveStatus(slugOrId: string, updates: {
+  current_players: number;
+  max_players?: number;
+  status?: 'online' | 'offline';
+  country?: string;
+  region?: string;
+  language?: string;
+  logo_url?: string;
+  banner_url?: string;
+}): Promise<boolean> {
+  const cleanKey = slugOrId.toLowerCase().trim();
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cleanKey);
+
+  // 1. Update in-memory store
+  const memServer = memoryServers.find(s => s.id.toLowerCase() === cleanKey || s.slug.toLowerCase() === cleanKey);
+  if (memServer) {
+    memServer.current_players = updates.current_players;
+    if (updates.max_players && updates.max_players > 0) memServer.max_players = updates.max_players;
+    if (updates.status) memServer.status = updates.status;
+    if (updates.country) memServer.country = updates.country;
+    if (updates.region) memServer.region = updates.region;
+    if (updates.language) memServer.language = updates.language;
+    if (updates.logo_url && !memServer.logo_url) memServer.logo_url = updates.logo_url;
+    if (updates.banner_url && !memServer.banner_url) memServer.banner_url = updates.banner_url;
+  }
+
+  // 2. Update Supabase
+  if (supabase) {
+    try {
+      const payload: Record<string, any> = {
+        current_players: updates.current_players,
+        updated_at: new Date().toISOString()
+      };
+      if (updates.max_players && updates.max_players > 0) payload.max_players = updates.max_players;
+      if (updates.status) payload.status = updates.status;
+      if (updates.country) payload.country = updates.country;
+      if (updates.region) payload.region = updates.region;
+      if (updates.language) payload.language = updates.language;
+      if (updates.logo_url) payload.logo_url = updates.logo_url;
+      if (updates.banner_url) payload.banner_url = updates.banner_url;
+
+      let query = supabase.from('servers').update(payload);
+      if (isUuid) {
+        query = query.eq('id', cleanKey);
+      } else {
+        query = query.ilike('slug', cleanKey);
+      }
+      await query;
+      return true;
+    } catch (err: any) {
+      console.warn('Failed to update live status in Supabase:', err.message);
+      return false;
+    }
+  }
+  return true;
+}
+
 

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ServerEntity } from '@/lib/types';
@@ -30,6 +30,7 @@ export default function ServerDirectory({
   categoryCounts,
 }: ServerDirectoryProps) {
   const pathname = usePathname();
+  const [serverList, setServerList] = useState<ServerEntity[]>(initialServers);
   const [searchQuery, setSearchQuery] = useState('');
   const [minPlayers, setMinPlayers] = useState(0);
   const [regionFilter, setRegionFilter] = useState('all');
@@ -37,6 +38,57 @@ export default function ServerDirectory({
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
+
+  // Keep state synchronized with server-side props
+  useEffect(() => {
+    setServerList(initialServers);
+  }, [initialServers]);
+
+  // Live background synchronization for active FiveM servers
+  useEffect(() => {
+    let isMounted = true;
+    const syncLiveTelemetry = async () => {
+      try {
+        const res = await fetch('/api/servers/sync-stats?limit=15&concurrency=10');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data && Array.isArray(data.results) && isMounted) {
+          const updatesMap = new Map<string, { players: number; maxPlayers: number; online: boolean }>();
+          data.results.forEach((r: any) => {
+            if (r.id) {
+              updatesMap.set(r.id, {
+                players: r.players,
+                maxPlayers: r.maxPlayers,
+                online: r.online
+              });
+            }
+          });
+
+          setServerList(prev => prev.map(s => {
+            const update = updatesMap.get(s.id);
+            if (update) {
+              return {
+                ...s,
+                current_players: update.players,
+                max_players: update.maxPlayers > 0 ? update.maxPlayers : s.max_players,
+                status: update.online ? 'online' : 'offline'
+              };
+            }
+            return s;
+          }));
+        }
+      } catch {
+        // Fallback gracefully without interrupting UI
+      }
+    };
+
+    syncLiveTelemetry();
+    const interval = setInterval(syncLiveTelemetry, 30000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, []);
 
   const toggleFeature = (feat: string) => {
     setSelectedFeatures(prev => 
@@ -55,7 +107,7 @@ export default function ServerDirectory({
   };
 
   const filteredServers = useMemo(() => {
-    let list = [...initialServers];
+    let list = [...serverList];
 
     // Search query
     if (searchQuery.trim()) {

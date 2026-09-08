@@ -2,7 +2,7 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getAllServers, getServerBySlug, getSimilarServers, recordPlayerSnapshot, formatHistoryTime } from '@/lib/data';
+import { getAllServers, getServerBySlug, getSimilarServers, recordPlayerSnapshot, formatHistoryTime, updateServerLiveStatus } from '@/lib/data';
 import { fetchFiveMStatus } from '@/lib/fivem';
 import { fetchDiscordStats } from '@/lib/discord';
 import ServerDetailClient from '@/components/ServerDetailClient';
@@ -115,6 +115,15 @@ export default async function ServerPage({ params }: PageProps) {
       logo_url: server.logo_url || liveFiveM.logoUrl,
       player_history: historyList
     };
+
+    // Persist live player counts and status to database and cache
+    updateServerLiveStatus(server.id, {
+      current_players: liveFiveM.players,
+      max_players: liveFiveM.maxPlayers > 0 ? liveFiveM.maxPlayers : server.max_players,
+      status: 'online',
+      logo_url: liveFiveM.logoUrl,
+      banner_url: liveFiveM.bannerUrl
+    }).catch(() => {});
   }
 
   const similarServers = await getSimilarServers(server, 2);
