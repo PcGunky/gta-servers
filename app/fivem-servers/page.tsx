@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: 'FiveM Servers — Best FiveM Server List & Rankings',
   description: 'Search and connect to the top FiveM GTA V multiplayer servers. Detailed player history, ping stats, custom scripts, and direct connect commands.',
   alternates: {
-    canonical: 'https://gtaservers.io/fivem-servers',
+    canonical: 'https://gtagameservers.com/fivem-servers',
   }
 };
 
@@ -25,13 +25,13 @@ export default async function FivemServersPage() {
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: 'https://gtaservers.io'
+        item: 'https://gtagameservers.com'
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'FiveM Servers',
-        item: 'https://gtaservers.io/fivem-servers'
+        item: 'https://gtagameservers.com/fivem-servers'
       }
     ]
   };

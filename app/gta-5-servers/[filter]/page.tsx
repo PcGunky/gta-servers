@@ -113,12 +113,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: config.title,
     description: config.description,
     alternates: {
-      canonical: `https://gtaservers.io/gta-5-servers/${params.filter.toLowerCase()}`,
+      canonical: `https://gtagameservers.com/gta-5-servers/${params.filter.toLowerCase()}`,
     },
     openGraph: {
       title: config.title,
       description: config.description,
-      url: `https://gtaservers.io/gta-5-servers/${params.filter.toLowerCase()}`,
+      url: `https://gtagameservers.com/gta-5-servers/${params.filter.toLowerCase()}`,
     }
   };
 }
@@ -149,19 +149,19 @@ export default async function ProgrammaticCategoryPage({ params }: PageProps) {
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: 'https://gtaservers.io'
+        item: 'https://gtagameservers.com'
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'GTA 5 Servers',
-        item: 'https://gtaservers.io/gta-5-servers'
+        item: 'https://gtagameservers.com/gta-5-servers'
       },
       {
         '@type': 'ListItem',
         position: 3,
         name: config.h1,
-        item: `https://gtaservers.io/gta-5-servers/${filterKey}`
+        item: `https://gtagameservers.com/gta-5-servers/${filterKey}`
       }
     ]
   };
@@ -175,7 +175,7 @@ export default async function ProgrammaticCategoryPage({ params }: PageProps) {
       '@type': 'ListItem',
       position: idx + 1,
       name: s.name,
-      url: `https://gtaservers.io/server/${s.slug}`
+      url: `https://gtagameservers.com/server/${s.slug}`
     }))
   };
 

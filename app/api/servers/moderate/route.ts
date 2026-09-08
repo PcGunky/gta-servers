@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   const secret = searchParams.get('secret') || '';
   const msgParam = searchParams.get('msg') || searchParams.get('message_id') || '';
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://gtaservers.io';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://gtagameservers.com';
   const expectedSecret = process.env.MODERATION_SECRET || 'gta_mod_sec_87e2b90ca14d59f3';
 
   // Security Check: Ensure moderation token matches secret

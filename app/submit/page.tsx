@@ -8,12 +8,12 @@ export const metadata: Metadata = {
   title: 'Submit Your GTA Server — Add Server to GTA SERVERS Directory',
   description: 'Register and publish your Grand Theft Auto V or FiveM server to the GTA SERVERS directory. Get indexed, gain daily players, track real-time uptime, and grow your community.',
   alternates: {
-    canonical: 'https://gtaservers.io/submit',
+    canonical: 'https://gtagameservers.com/submit',
   },
   openGraph: {
     title: 'Submit Your GTA Server — Add Server to Directory',
     description: 'Register and publish your Grand Theft Auto V or FiveM server to the GTA SERVERS directory. Gain players and track real-time analytics.',
-    url: 'https://gtaservers.io/submit',
+    url: 'https://gtagameservers.com/submit',
   }
 };
 
@@ -26,13 +26,13 @@ export default function SubmitPage() {
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: 'https://gtaservers.io'
+        item: 'https://gtagameservers.com'
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'Submit Server',
-        item: 'https://gtaservers.io/submit'
+        item: 'https://gtagameservers.com/submit'
       }
     ]
   };

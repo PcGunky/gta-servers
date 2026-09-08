@@ -4,7 +4,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://gtaservers.io'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || process.env.URL || 'https://gtagameservers.com'),
   title: {
     default: 'GTA SERVERS — All GTA 5 & FiveM Game Servers',
     template: '%s — GTA SERVERS'
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://gtaservers.io',
+    url: 'https://gtagameservers.com',
     siteName: 'GTA Game Servers',
     title: 'GTA SERVERS — Grand Theft Auto V & FiveM Directory',
     description: 'Find, rank, and join top GTA 5 & FiveM servers worldwide with real-time status and player stats.',

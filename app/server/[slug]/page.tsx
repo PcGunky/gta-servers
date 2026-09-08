@@ -40,12 +40,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title,
     description,
     alternates: {
-      canonical: `https://gtaservers.io/server/${server.slug}`,
+      canonical: `https://gtagameservers.com/server/${server.slug}`,
     },
     openGraph: {
       title,
       description,
-      url: `https://gtaservers.io/server/${server.slug}`,
+      url: `https://gtagameservers.com/server/${server.slug}`,
       images: [
         {
           url: server.banner_url || '/assets/herote.png',
@@ -127,19 +127,19 @@ export default async function ServerPage({ params }: PageProps) {
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: 'https://gtaservers.io'
+        item: 'https://gtagameservers.com'
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: `${server.game} Servers`,
-        item: 'https://gtaservers.io'
+        item: 'https://gtagameservers.com'
       },
       {
         '@type': 'ListItem',
         position: 3,
         name: server.name,
-        item: `https://gtaservers.io/server/${server.slug}`
+        item: `https://gtagameservers.com/server/${server.slug}`
       }
     ]
   };
@@ -151,7 +151,7 @@ export default async function ServerPage({ params }: PageProps) {
     operatingSystem: 'Windows',
     applicationCategory: 'GameServer',
     description: server.description,
-    url: `https://gtaservers.io/server/${server.slug}`,
+    url: `https://gtagameservers.com/server/${server.slug}`,
     aggregateRating: {
       '@type': 'AggregateRating',
       ratingValue: '4.9',

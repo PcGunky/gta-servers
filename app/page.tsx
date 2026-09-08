@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: 'GTA 5 Servers — Best GTA V & FiveM Server List',
   description: 'Browse the top-ranked GTA 5 and FiveM multiplayer servers. Check live online player counts, ping, economy features, and connect in seconds.',
   alternates: {
-    canonical: 'https://gtaservers.io/',
+    canonical: 'https://gtagameservers.com/',
   }
 };
 
@@ -22,11 +22,11 @@ export default async function HomePage() {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'GTA Game Servers',
-    url: 'https://gtaservers.io',
+    url: 'https://gtagameservers.com',
     description: 'The premier directory for GTA 5, GTA 6, and FiveM multiplayer servers.',
     potentialAction: {
       '@type': 'SearchAction',
-      target: 'https://gtaservers.io/search?q={search_term_string}',
+      target: 'https://gtagameservers.com/search?q={search_term_string}',
       'query-input': 'required name=search_term_string'
     }
   };
@@ -40,7 +40,7 @@ export default async function HomePage() {
       '@type': 'ListItem',
       position: idx + 1,
       name: s.name,
-      url: `https://gtaservers.io/server/${s.slug}`
+      url: `https://gtagameservers.com/server/${s.slug}`
     }))
   };
 

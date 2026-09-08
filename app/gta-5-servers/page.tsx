@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: 'GTA 5 Servers — Complete GTA V & FiveM Multiplayer Directory',
   description: 'Explore all verified GTA 5 multiplayer servers. Filter by Roleplay, Freeroam, PvP, language, and country. Find your next favorite community today.',
   alternates: {
-    canonical: 'https://gtaservers.io/gta-5-servers',
+    canonical: 'https://gtagameservers.com/gta-5-servers',
   }
 };
 
@@ -25,13 +25,13 @@ export default async function Gta5ServersHubPage() {
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: 'https://gtaservers.io'
+        item: 'https://gtagameservers.com'
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'GTA 5 Servers',
-        item: 'https://gtaservers.io/gta-5-servers'
+        item: 'https://gtagameservers.com/gta-5-servers'
       }
     ]
   };

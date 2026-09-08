@@ -46,7 +46,7 @@ export async function sendSubmissionDiscordWebhook(payload: DiscordSubmissionPay
     return { success: false };
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://gtaservers.io';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.URL || 'https://gtagameservers.com';
   const serverUrl = `${siteUrl}/server/${payload.slug}`;
   const modSecret = process.env.MODERATION_SECRET || 'gta_mod_sec_87e2b90ca14d59f3';
 

@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { getAllServers } from '@/lib/data';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://gtaservers.io';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.URL || 'https://gtagameservers.com';
   const servers = await getAllServers();
 
   const staticRoutes: MetadataRoute.Sitemap = [
