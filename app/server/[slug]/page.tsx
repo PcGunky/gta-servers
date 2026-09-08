@@ -16,7 +16,7 @@ interface PageProps {
   };
 }
 
-export const revalidate = 30;
+export const dynamic = 'force-dynamic';
 
 export async function generateStaticParams() {
   const servers = await getAllServers();

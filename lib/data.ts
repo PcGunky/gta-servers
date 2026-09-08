@@ -200,11 +200,16 @@ export async function getServerBySlug(slug: string, allowPending = false): Promi
             .order('recorded_at', { ascending: true });
 
           if (historyRows && historyRows.length > 0) {
-            entity.player_history = historyRows.map((r: any) => ({
-              time: formatHistoryTime(r.recorded_at),
-              count: Number(r.player_count),
-              recorded_at: r.recorded_at
-            }));
+            const hourlyMap = new Map<string, { time: string; count: number; recorded_at: string }>();
+            for (const r of historyRows) {
+              const hourLabel = formatHistoryTime(r.recorded_at);
+              hourlyMap.set(hourLabel, {
+                time: hourLabel,
+                count: Number(r.player_count),
+                recorded_at: r.recorded_at
+              });
+            }
+            entity.player_history = Array.from(hourlyMap.values());
           } else {
             entity.player_history = [];
           }
@@ -280,7 +285,7 @@ export async function recordPlayerSnapshot(serverId: string, count: number): Pro
         await supabase.from('player_history').insert({
           server_id: serverId,
           player_count: count,
-          recorded_at: nowIso
+          recorded_at: hourIso
         });
       }
     } catch (err: any) {

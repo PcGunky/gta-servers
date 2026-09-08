@@ -51,7 +51,6 @@ export async function GET(req: NextRequest) {
       fivemServers = fivemServers.slice(offset, limit !== undefined ? offset + limit : undefined);
     }
 
-    const historyRecords: Array<{ server_id: string; player_count: number; recorded_at: string }> = [];
     const serverUpdates: Array<{ id: string; payload: Record<string, any> }> = [];
 
     // Query server statuses with controlled concurrency (e.g. 20 concurrent requests)
@@ -84,14 +83,6 @@ export async function GET(req: NextRequest) {
           payload: updatePayload
         });
 
-        if (status.online) {
-          historyRecords.push({
-            server_id: server.id,
-            player_count: newPlayers,
-            recorded_at: new Date().toISOString()
-          });
-        }
-
         return {
           id: server.id,
           name: server.name,
@@ -118,15 +109,6 @@ export async function GET(req: NextRequest) {
           .update(payload)
           .eq('id', id);
       });
-    }
-
-    // Write player history in chunks of 100 rows per single insert query
-    if (supabase && historyRecords.length > 0) {
-      const client = supabase;
-      for (let i = 0; i < historyRecords.length; i += 100) {
-        const chunk = historyRecords.slice(i, i + 100);
-        await client.from('player_history').insert(chunk);
-      }
     }
 
     const durationMs = Date.now() - startTime;

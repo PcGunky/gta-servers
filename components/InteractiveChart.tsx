@@ -67,17 +67,32 @@ export default function InteractiveChart({ data, serverName, currentPlayers = 0 
     }
   }, []);
 
-  // ONLY use genuine recorded telemetry points — never fabricate or simulate fake curves!
+  // ONLY use genuine recorded telemetry points — strictly hourly (1 point per hour)
   const points = useMemo(() => {
     if (data && data.length > 0) {
-      return data;
+      const hourlyMap = new Map<string, PlayerHistoryPoint>();
+      for (const p of data) {
+        let hourLabel = p.time || '00:00';
+        if (p.recorded_at) {
+          const d = new Date(p.recorded_at);
+          hourLabel = `${String(d.getHours()).padStart(2, '0')}:00`;
+        } else if (p.time && p.time.includes(':')) {
+          const parts = p.time.split(':');
+          hourLabel = `${parts[0].padStart(2, '0')}:00`;
+        }
+        // Keep the latest recorded point for that hour
+        hourlyMap.set(hourLabel, {
+          ...p,
+          time: hourLabel
+        });
+      }
+      return Array.from(hourlyMap.values());
     }
     if (currentPlayers > 0) {
       const now = new Date();
       const hours = String(now.getHours()).padStart(2, '0');
-      const mins = String(now.getMinutes()).padStart(2, '0');
       return [{
-        time: `${hours}:${mins}`,
+        time: `${hours}:00`,
         count: currentPlayers,
         recorded_at: now.toISOString()
       }];

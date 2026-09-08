@@ -11,7 +11,7 @@ interface PageProps {
   };
 }
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 interface FilterMeta {
   title: string;
@@ -131,7 +131,7 @@ export default async function ProgrammaticCategoryPage({ params }: PageProps) {
     notFound();
   }
 
-  const [servers, categoryCounts] = await Promise.all([
+  const [rawServers, categoryCounts] = await Promise.all([
     getAllServers({
       category: config.categoryKey,
       country: config.countryKey,
@@ -140,6 +140,31 @@ export default async function ProgrammaticCategoryPage({ params }: PageProps) {
     }),
     getCategoryCounts()
   ]);
+
+  const { fetchFiveMStatus } = await import('@/lib/fivem');
+  const servers = await Promise.all(
+    rawServers.map(async (s) => {
+      if (s.platform === 'FiveM' && (s.cfx_code || s.ip)) {
+        try {
+          const live = await fetchFiveMStatus({
+            cfxOrInput: s.cfx_code || undefined,
+            ip: s.ip && !s.ip.includes('cfx.re') ? s.ip : undefined,
+            port: s.port
+          });
+          if (live && live.online) {
+            return {
+              ...s,
+              current_players: live.players,
+              max_players: live.maxPlayers > 0 ? live.maxPlayers : s.max_players,
+              status: 'online' as const,
+              logo_url: s.logo_url || live.logoUrl
+            };
+          }
+        } catch {}
+      }
+      return s;
+    })
+  );
 
   const breadcrumbsSchema = {
     '@context': 'https://schema.org',
