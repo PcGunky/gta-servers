@@ -260,28 +260,38 @@ export async function recordPlayerSnapshot(serverId: string, count: number): Pro
   if (existingMem.length > 0) {
     const last = existingMem[existingMem.length - 1];
     const lastTime = last.recorded_at ? new Date(last.recorded_at).getTime() : 0;
-    // Strictly throttle: only 1 telemetry point per full hour (e.g. 09:00, 10:00, 11:00)
-    if (now.getTime() - lastTime < 60 * 60 * 1000) {
-      return;
+    // If last point was within the same hour, update count
+    if (Math.abs(hourDate.getTime() - lastTime) < 50 * 60 * 1000) {
+      last.count = count;
+      memoryPlayerHistory.set(serverId, existingMem);
+    } else {
+      existingMem.push({ count, recorded_at: hourIso, time: timeStr });
+      if (existingMem.length > 24) existingMem.shift();
+      memoryPlayerHistory.set(serverId, existingMem);
     }
+  } else {
+    memoryPlayerHistory.set(serverId, [{ count, recorded_at: hourIso, time: timeStr }]);
   }
-
-  const newPoint = { count, recorded_at: hourIso, time: timeStr };
-  existingMem.push(newPoint);
-  if (existingMem.length > 24) existingMem.shift();
-  memoryPlayerHistory.set(serverId, existingMem);
 
   if (supabase) {
     try {
-      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+      // Check if a snapshot was already recorded for this specific hour
       const { data: recent } = await supabase
         .from('player_history')
-        .select('id')
+        .select('id, recorded_at')
         .eq('server_id', serverId)
-        .gte('recorded_at', oneHourAgo)
+        .gte('recorded_at', hourIso)
+        .order('recorded_at', { ascending: false })
         .limit(1);
 
-      if (!recent || recent.length === 0) {
+      if (recent && recent.length > 0) {
+        // Refresh the current hour's telemetry point with latest live player count
+        await supabase
+          .from('player_history')
+          .update({ player_count: count })
+          .eq('id', recent[0].id);
+      } else {
+        // Insert new hourly snapshot
         await supabase.from('player_history').insert({
           server_id: serverId,
           player_count: count,

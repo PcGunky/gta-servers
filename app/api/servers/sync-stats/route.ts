@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllServers, supabase } from '@/lib/data';
+import { getAllServers, supabase, recordPlayerSnapshot } from '@/lib/data';
 import { fetchFiveMStatus } from '@/lib/fivem';
 
 export const dynamic = 'force-dynamic';
@@ -101,14 +101,26 @@ export async function GET(req: NextRequest) {
     });
 
     // Write server updates in parallel batches (10 DB writes at a time)
-    if (supabase && serverUpdates.length > 0) {
-      const client = supabase;
-      await runWithConcurrency(serverUpdates, 10, async ({ id, payload }) => {
-        await client
-          .from('servers')
-          .update(payload)
-          .eq('id', id);
-      });
+    if (serverUpdates.length > 0) {
+      if (supabase) {
+        const client = supabase;
+        await runWithConcurrency(serverUpdates, 10, async ({ id, payload }) => {
+          await client
+            .from('servers')
+            .update(payload)
+            .eq('id', id);
+
+          if (payload.status === 'online' && typeof payload.current_players === 'number') {
+            await recordPlayerSnapshot(id, payload.current_players);
+          }
+        });
+      } else {
+        for (const update of serverUpdates) {
+          if (update.payload.status === 'online') {
+            await recordPlayerSnapshot(update.id, update.payload.current_players);
+          }
+        }
+      }
     }
 
     const durationMs = Date.now() - startTime;

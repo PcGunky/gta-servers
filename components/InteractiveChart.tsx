@@ -67,37 +67,107 @@ export default function InteractiveChart({ data, serverName, currentPlayers = 0 
     }
   }, []);
 
-  // ONLY use genuine recorded telemetry points — strictly hourly (1 point per hour)
+  // Builds a continuous 24-hour telemetry timeline ending at the current hour
   const points = useMemo(() => {
+    const now = new Date();
+    const currentHourDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 0, 0, 0);
+    const currentHourTs = currentHourDate.getTime();
+    const currentHourStr = `${String(currentHourDate.getHours()).padStart(2, '0')}:00`;
+
+    // Extract all recorded history points with normalized timestamps
+    const recordedMap = new Map<number, number>(); // timestamp -> player count
+
     if (data && data.length > 0) {
-      const hourlyMap = new Map<string, PlayerHistoryPoint>();
       for (const p of data) {
-        let hourLabel = p.time || '00:00';
         if (p.recorded_at) {
           const d = new Date(p.recorded_at);
-          hourLabel = `${String(d.getHours()).padStart(2, '0')}:00`;
+          const hDate = new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), 0, 0, 0);
+          recordedMap.set(hDate.getTime(), Number(p.count));
         } else if (p.time && p.time.includes(':')) {
-          const parts = p.time.split(':');
-          hourLabel = `${parts[0].padStart(2, '0')}:00`;
+          // Fallback if recorded_at was not provided
+          const hour = parseInt(p.time.split(':')[0], 10);
+          if (!isNaN(hour)) {
+            let targetDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, 0, 0, 0);
+            if (targetDate.getTime() > currentHourTs) {
+              targetDate = new Date(targetDate.getTime() - 24 * 60 * 60 * 1000);
+            }
+            recordedMap.set(targetDate.getTime(), Number(p.count));
+          }
         }
-        // Keep the latest recorded point for that hour
-        hourlyMap.set(hourLabel, {
-          ...p,
-          time: hourLabel
-        });
       }
-      return Array.from(hourlyMap.values());
     }
+
+    // Always ensure the current hour reflects live players if known
     if (currentPlayers > 0) {
-      const now = new Date();
-      const hours = String(now.getHours()).padStart(2, '0');
+      recordedMap.set(currentHourTs, currentPlayers);
+    }
+
+    // If completely empty, return single live point
+    if (recordedMap.size === 0) {
+      if (currentPlayers > 0) {
+        return [{
+          time: currentHourStr,
+          count: currentPlayers,
+          recorded_at: currentHourDate.toISOString()
+        }];
+      }
+      return [];
+    }
+
+    // If only 1 point exists across all history, show as single live snapshot point
+    if (recordedMap.size === 1) {
+      const [ts, count] = Array.from(recordedMap.entries())[0];
+      const d = new Date(ts);
       return [{
-        time: `${hours}:00`,
-        count: currentPlayers,
-        recorded_at: now.toISOString()
+        time: `${String(d.getHours()).padStart(2, '0')}:00`,
+        count,
+        recorded_at: d.toISOString()
       }];
     }
-    return [];
+
+    // Build continuous 24-hour sequence: 24 hourly buckets from (currentHour - 23h) to currentHour
+    const oneHourMs = 60 * 60 * 1000;
+    const sortedRecorded = Array.from(recordedMap.entries()).sort((a, b) => a[0] - b[0]);
+
+    const result24: PlayerHistoryPoint[] = [];
+
+    for (let i = 23; i >= 0; i--) {
+      const slotTs = currentHourTs - i * oneHourMs;
+      const slotDate = new Date(slotTs);
+      const slotTimeStr = `${String(slotDate.getHours()).padStart(2, '0')}:00`;
+
+      if (recordedMap.has(slotTs)) {
+        result24.push({
+          time: slotTimeStr,
+          count: recordedMap.get(slotTs)!,
+          recorded_at: slotDate.toISOString()
+        });
+      } else {
+        // Interpolate between closest preceding and closest succeeding points
+        const prev = sortedRecorded.filter(([ts]) => ts <= slotTs).pop();
+        const next = sortedRecorded.find(([ts]) => ts > slotTs);
+
+        let count: number;
+        if (prev && next) {
+          const ratio = (slotTs - prev[0]) / (next[0] - prev[0]);
+          count = Math.round(prev[1] + ratio * (next[1] - prev[1]));
+        } else if (prev) {
+          count = prev[1];
+        } else if (next) {
+          count = next[1];
+        } else {
+          count = currentPlayers;
+        }
+
+        result24.push({
+          time: slotTimeStr,
+          count: Math.max(0, count),
+          recorded_at: slotDate.toISOString()
+        });
+      }
+    }
+
+    return result24;
   }, [data, currentPlayers]);
 
   const height = 220;

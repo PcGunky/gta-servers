@@ -1,0 +1,19 @@
+name: GTA Servers 24/7 Telemetry Cron
+
+on:
+  schedule:
+    # Runs every 30 minutes around the clock
+    - cron: '*/30 * * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  ping-telemetry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping Monitoring Telemetry API
+        run: |
+          SITE_URL="${{ secrets.SITE_URL || 'https://gtagameservers.com' }}"
+          echo "Pinging telemetry endpoint at ${SITE_URL}/api/cron/monitor..."
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X GET "${SITE_URL}/api/cron/monitor" -H "User-Agent: GitHub-Actions-Telemetry-Worker")
+          echo "$RESPONSE"

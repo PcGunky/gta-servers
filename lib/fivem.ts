@@ -141,11 +141,12 @@ export async function fetchFiveMStatus(options: {
   if (code) {
     try {
       const res = await fetch(`https://frontend.cfx-services.net/api/servers/single/${code}`, {
+        cache: 'no-store',
         headers: {
           'User-Agent': 'CitizenFX/1',
           'Accept': 'application/json'
         },
-        signal: AbortSignal.timeout(2500)
+        signal: AbortSignal.timeout(3500)
       });
 
       if (res.ok) {
@@ -206,6 +207,7 @@ export async function fetchFiveMStatus(options: {
   if (code) {
     try {
       const res = await fetch(`https://cfx.re/join/${code}`, {
+        cache: 'no-store',
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
         },
@@ -272,6 +274,7 @@ export async function fetchFiveMStatus(options: {
     const directBase = `http://${resolvedIp}:${resolvedPort}`;
     try {
       const dynRes = await fetch(`${directBase}/dynamic.json`, {
+        cache: 'no-store',
         signal: AbortSignal.timeout(3500)
       });
 
@@ -298,6 +301,7 @@ export async function fetchFiveMStatus(options: {
 
     try {
       const infoRes = await fetch(`${directBase}/info.json`, {
+        cache: 'no-store',
         signal: AbortSignal.timeout(3000)
       });
 

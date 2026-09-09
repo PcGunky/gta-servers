@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Metadata } from 'next';
-import { getAllServers, getCategoryCounts } from '@/lib/data';
+import { getAllServers, getCategoryCounts, updateServerLiveStatus, recordPlayerSnapshot } from '@/lib/data';
 import ServerDirectory from '@/components/ServerDirectory';
 import JsonLd from '@/components/JsonLd';
 
@@ -29,6 +29,15 @@ export default async function HomePage() {
             port: s.port
           });
           if (live && live.online) {
+            updateServerLiveStatus(s.id, {
+              current_players: live.players,
+              max_players: live.maxPlayers > 0 ? live.maxPlayers : s.max_players,
+              status: 'online',
+              logo_url: live.logoUrl
+            }).catch(() => {});
+
+            recordPlayerSnapshot(s.id, live.players).catch(() => {});
+
             return {
               ...s,
               current_players: live.players,
